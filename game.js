@@ -62,5 +62,6 @@ play_game()   //  Starts game when page loads.
 let play_again_button =  document.querySelector('#play-again')
 
 play_again_button.addEventListener('click', () => {   //  resets game with new random country.
+  document.getElementById('user-answer').value=''
   play_game()
 })
