@@ -1,33 +1,66 @@
-let randomCountryElement = document.querySelector('#random-country')
-let userAnswerElement = document.querySelector("#user-answer")
-let submitButton = document.querySelector("#submit-answer")
-let resultTextElement = document.querySelector('#result')
-
-// TODO finish the script to challenge the user about their knowledge of capital cities.
-// An array of country codes is provided in the countries.js file. 
-// Your browser treats all JavaScript files as one big file, o
-// organized in the order of the script tags so the countriesAndCodes array is available to this script.
-
-console.log(countriesAndCodes)  // You don't need to log countriesAndCodes - just proving it is available 
+//Capital City Quiz lab. This program uses world bank API to get capital city of the randomly selected country from country.js.
+//TODO add room for error on user spelling. currently the user answer must match exactly as its spelled in world bank API
+//Jacob Tyson 10/13/2020
 
 
-// TODO when the page loads, select an element at random from the countriesAndCodes array
+let randomCountryElement = document.querySelector('#random-country')    // selects doc element
+let userAnswerElement = document.querySelector("#user-answer")  //  selects doc element
+let submitButton = document.querySelector("#submit-answer")   // selects submit button
 
-// TODO display the country's name in the randomCountryElement 
+function play_game(){
+  let number_of_countries = countriesAndCodes.length;   //  Gets the length of countries and code array
+  let random_country_number = Math.floor(Math.random() * number_of_countries);   //  selects random number from 0 - total number of countries in array
 
-// TODO add a click event handler to the submitButton.  When the user clicks the button,
-//  * read the text from the userAnswerElement 
-//  * Use fetch() to make a call to the World Bank API with the two-letter country code (from countriesAndCodes, example 'CN' or 'AF')
-//  * Verify no errors were encountered in the API call. If an error occurs, display an alert message. 
-//  * If the API call was successful, extract the capital city from the World Bank API response.
-//  * Compare it to the user's answer. 
-//      You can decide how correct you require the user to be. At the minimum, the user's answer should be the same
-//      as the World Bank data - make the comparison case insensitive.
-//      If you want to be more flexible, include and use a string similarity library such as https://github.com/hiddentao/fast-levenshtein 
-//  * Finally, display an appropriate message in the resultTextElement to tell the user if they are right or wrong. 
-//      For example "Correct! The capital of Germany is Berlin" or "Wrong - the capital of Germany is not G, it is Berlin"
+  let random_country_display = document.querySelector('#random-country');   //  Selects DOM element of random Country
+  let random_country_object = countriesAndCodes[random_country_number];   //  Selects the object based from random number of countries in array
+  let country_name = random_country_object.name;
+  random_country_display.innerHTML = country_name;   //  Displays the name of country in the selected object in html element
+  let country_Abr = random_country_object['alpha-2'];
 
 
-// TODO finally, connect the play again button. Clear the user's answer, select a new random country, 
-// display the country's name, handle the user's guess. If you didn't use functions in the code you've 
-// already written, you should refactor your code to use functions to avoid writing very similar code twice. 
+    let url = `https://api.worldbank.org/v2/country/${country_Abr}?format=json`   //  get world bank api. uses country abbr from randomly selected country
+    let capital_name    //  delcares var for country name
+
+    fetch(url)       //  declares variable for array object from world bank api contains country info.
+    .then( (response) =>{
+      let json_data = response.json();    //  gets the json data promise
+      return json_data;
+    }).catch( (err) => {
+      alert('API Error. Please try again later!')   //  sends alert if api error occurs.
+    }).then( (country_array) =>{    //  uses json data to get capital name fromrandomly generated country.
+      let get_array_object = country_array[1];
+      let capital_name
+
+      function get_capital_name(get_array_object){    //  Creates function with selected array object of random country. to get capital name
+        let capital_name
+        for (let i = 0; i < get_array_object.length; i++){    //    loops through array add name value to country_name
+          capital_name = get_array_object[i].capitalCity   // access capital name from json data
+        }return capital_name    // returns randomly selected country.
+      }
+
+      capital_name = get_capital_name(get_array_object)   //  gets randomly generated country's capital name.
+      return capital_name
+    }).then( (capital_name) =>{
+         //  displays the reults
+      let submit_button = document.querySelector('#submit-answer');
+      submit_button.addEventListener('click', ()=>{
+        let user_input = document.querySelector('#user-answer');    //  selects html input element
+        let user_answer = user_input.value;
+      if (user_answer == capital_name){
+        let result_display = document.querySelector('#result')
+        result_display.innerHTML ='Correct! The capital of ' +country_name+' is '+ capital_name   // right answer display
+      }else{
+        let result_display = document.querySelector('#result')
+        result_display.innerHTML ='Wrong. The capital of ' +country_name+' is '+ capital_name   //  wrong answer display
+        }
+      })
+    })
+  }
+
+play_game()   //  Starts game when page loads.
+
+let play_again_button =  document.querySelector('#play-again')
+
+play_again_button.addEventListener('click', () => {   //  resets game with new random country.
+  play_game()
+})
